@@ -1,6 +1,7 @@
 /// Application-wide constants
 class AppConstants {
-  static const String websocketUrl = "";
+  static const String websocketIP = "10.0.2.2:8080";
+  static const int reconnectInterval = 5;
 
   static const double emojiSize = 24;
   static const double cardPadding = 16;

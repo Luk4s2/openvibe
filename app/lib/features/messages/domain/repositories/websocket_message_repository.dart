@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:app/core/constants/app_constants.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
@@ -16,8 +17,8 @@ class WebSocketMessageRepository implements MessageRepository {
   bool _isConnected = false;
   bool _isConnecting = false;
 
-  static const String _url = 'ws://10.0.2.2:8080/';
-  static const Duration _reconnectInterval = Duration(seconds: 5);
+  static const String _url = 'ws://${AppConstants.websocketIP}/';
+  static const Duration _reconnectInterval = Duration(seconds: AppConstants.reconnectInterval);
 
   String? _lastFeedId;
   int? _lastAmount;
@@ -26,7 +27,6 @@ class WebSocketMessageRepository implements MessageRepository {
     _initConnection();
   }
 
-  /// Starts and retries the WebSocket connection.
   void _initConnection() {
     if (_isConnecting) return;
     _isConnecting = true;
@@ -38,34 +38,39 @@ class WebSocketMessageRepository implements MessageRepository {
       }
 
       try {
-        _channel = WebSocketChannel.connect(Uri.parse(_url));
-        _channel!.stream.listen(
+        final channel = WebSocketChannel.connect(Uri.parse(_url));
+
+        channel.stream.listen(
           _handleData,
           onDone: () {
             _isConnected = false;
-            _initConnection();
+            _isConnecting = false;
+            _channel = null;
           },
           onError: (_) {
             _isConnected = false;
+            _isConnecting = false;
+            _channel = null;
           },
           cancelOnError: true,
         );
 
+        _channel = channel;
         _isConnected = true;
         _isConnecting = false;
         timer.cancel();
 
-        // Resend last request if any
         if (_lastFeedId != null && _lastAmount != null) {
           requestMessages(_lastFeedId!, _lastAmount!);
         }
-      } catch (_) {
+      } catch (e) {
         _isConnected = false;
+        _isConnecting = false;
+        _channel = null;
       }
     });
   }
 
-  /// Processes incoming WebSocket data.
   void _handleData(dynamic data) {
     dynamic decoded;
     try {
