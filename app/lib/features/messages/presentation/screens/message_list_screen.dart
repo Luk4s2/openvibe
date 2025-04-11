@@ -16,7 +16,8 @@ class MessageListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => locator<MessageListBloc>()
-        ..add(const FetchMessages(AppConstants.defaultMessageId, AppConstants.defaultFetchAmount)),
+        ..add(const FetchMessages(
+            AppConstants.defaultMessageId, AppConstants.defaultFetchAmount)),
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
@@ -37,7 +38,8 @@ class MessageListScreen extends StatelessWidget {
                 ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
               return ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 itemCount: messages.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (_, index) {

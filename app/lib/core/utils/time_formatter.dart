@@ -1,6 +1,4 @@
 import 'package:intl/intl.dart';
-/// Provides utility methods for formatting date and time into readable formats.
-
 
 /// Returns a relative time string like '3m', '2h', '1d' based on [time].
 String formatTimeAgo(DateTime time) {

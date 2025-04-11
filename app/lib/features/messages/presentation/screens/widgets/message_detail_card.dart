@@ -30,7 +30,8 @@ class MessageDetailCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(message.icon, style: const TextStyle(fontSize: AppConstants.emojiSize * 2)),
+          Text(message.icon,
+              style: const TextStyle(fontSize: AppConstants.emojiSize * 2)),
           const SizedBox(height: AppConstants.spacing),
           Text(
             formatFullDateTime(message.createdAt),

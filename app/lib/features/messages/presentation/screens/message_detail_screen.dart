@@ -26,9 +26,8 @@ class MessageDetailScreen extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(AppConstants.cardPadding),
-        child: MessageDetailCard(message: message)
-      ),
+          padding: const EdgeInsets.all(AppConstants.cardPadding),
+          child: MessageDetailCard(message: message)),
     );
   }
 }

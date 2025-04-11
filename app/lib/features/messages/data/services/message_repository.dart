@@ -1,5 +1,3 @@
-
-
 import '../../domain/entities/message.dart';
 
 /// Abstract class defining the contract for any message repository implementation.

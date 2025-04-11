@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/message.dart';
 import '../../domain/usecases/fetch_messages_usecase.dart';
 import '../bloc/message_list_event.dart';
 import '../bloc/message_list_state.dart';
@@ -15,24 +14,21 @@ class MessageListBloc extends Bloc<MessageListEvent, MessageListState> {
   }
 
   Future<void> _onFetchMessages(
-    FetchMessages event,
-    Emitter<MessageListState> emit,
-  ) async {
-    emit(const MessageListLoading());
+  FetchMessages event,
+  Emitter<MessageListState> emit,
+) async {
+  emit(const MessageListLoading());
 
-    try {
-      fetchMessagesUseCase(event.feedId, event.amount);
+  try {
+    fetchMessagesUseCase(event.feedId, event.amount);
 
-      await emit.forEach<Message>(
-        fetchMessagesUseCase.repository.messages,
-        onData: (message) {
-          final messages = fetchMessagesUseCase.repository.cachedMessages;
-          return MessageListLoaded(messages);
-        },
-        onError: (error, _) => MessageListError(error.toString()),
-      );
-    } catch (e) {
-      emit(MessageListError(e.toString()));
+    // Listen only once and store the subscription
+    await for (final _ in fetchMessagesUseCase.repository.messages) {
+      final messages = fetchMessagesUseCase.repository.cachedMessages;
+      emit(MessageListLoaded(messages));
     }
+  } catch (e) {
+    emit(MessageListError(e.toString()));
   }
+}
 }

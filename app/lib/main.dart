@@ -5,7 +5,6 @@ import 'core/navigation/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 
-
 /// Entry point of the Openvibe application.
 void main() {
   initDependencies();

@@ -1,6 +1,5 @@
 import '../../data/services/message_repository.dart';
 
-
 /// A use case responsible for triggering message fetch requests.
 class FetchMessagesUseCase {
   final MessageRepository repository;
