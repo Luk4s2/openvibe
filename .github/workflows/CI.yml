@@ -21,10 +21,13 @@ jobs:
           cache: true
 
       - name: Install dependencies
+        working-directory: app
         run: flutter pub get
 
       - name: Run analyzer
+        working-directory: app
         run: flutter analyze
 
       - name: Run tests
+        working-directory: app
         run: flutter test
