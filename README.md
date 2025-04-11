@@ -1,28 +1,108 @@
-# Openvibe Assignment
+# 🧠 Flutter example of message chat
 
-Objective: Develop a basic Flutter-based social media app with two primary interfaces - a message list and a detailed view of a selected message.
+A cleanly architected **Flutter** social media-style app that displays a feed of user messages using a **WebSocket** connection to fetch data in real-time.
 
-**First Interface: Message List**
-This screen will display an array of messages with the following details for each:
-- Icon: Representing a user's profile picture, simplified to an emoji.
-- Nickname: The user's chosen nickname who posted the message.
-- CreatedAt: The timestamp of when the message was posted, formatted similarly to Twitter (e.g., '3m' for three minutes ago).
-- Message: The actual content of the message.
+## 📱 Features
 
-**Second Interface: Message Detail**
-Upon selecting a message from the list, this screen will present the same information but with enhanced formatting. The creation time will be displayed in its full format.
+- 🔄 Real-time message fetching from a WebSocket server
+- 🧑‍💻 Message list UI with:
+  - Emoji avatar
+  - Nickname
+  - Message preview
+  - Twitter-style relative timestamp
+- 📄 Detailed message screen with:
+  - Full timestamp
+  - Full message
+  - Consistent design
+- 🔁 Hot reload support
+- 🧠 Clean Architecture + Dependency Injection
 
-**Data Handling:**
-Messages are fetched from a locally hosted server using a websocket connection, employing a format akin to Nostr. 
-To request messages, send a request in the format: ['get', '$id', $amount], where the server will respond with the specified number of messages. Each message received is an individual response.
+---
 
-**Caching:**
-All messages should be cached. The detailed message view should retrieve data from this cache.
+## 🧱 Architecture
 
-## Server Setup 
+Follows **Clean Architecture** principles:
 
-The server is based on dart_frog. You'll need to install necessary dependencies and serve it locally using the command `dart_frog dev`. For detailed information, visit [Dart Frog Documentation](https://dartfrog.vgv.dev/docs/overview).
+```
+lib/
+├── core/
+│   ├── constants/
+│   ├── di/                   # Dependency injection setup
+│   └── utils/                # Formatters, helpers
+│
+├── features/
+│   └── messages/
+│       ├── data/             # WebSocket + repository
+│       ├── domain/           # Entities + UseCases
+│       └── presentation/     # Bloc + Screens
+```
 
-## Task Completion
+- 💡 `domain`: business logic & abstractions
+- 🛰️ `data`: WebSocket implementation
+- 🎨 `presentation`: UI and state management
 
-To submit your work, fork the given repository and implement your solution in the app folder.
+---
+
+## 🚀 Getting Started
+
+### ✅ Prerequisites
+
+- [Flutter SDK](https://docs.flutter.dev/get-started/install)
+- Dart Frog CLI for mock backend
+
+```bash
+dart pub global activate dart_frog_cli
+```
+
+### 🛠️ Installation
+
+1. Clone the repo:
+```bash
+git clone https://github.com/luk4s2/openvibe
+```
+
+2. Get dependencies:
+```bash
+flutter pub get
+```
+
+3. Start the mock server:
+```bash
+cd server
+dart_frog dev
+```
+
+4. Run the app:
+```bash
+flutter run
+```
+
+---
+
+## 🧪 Testing
+
+Unit testing can be added to:
+- `usecases/`
+- `bloc/`
+
+Add test dependencies in `pubspec.yaml` and use:
+
+```bash
+flutter test
+```
+
+---
+
+## 🔗 Technologies
+
+- [Flutter](https://flutter.dev/)
+- [Bloc](https://pub.dev/packages/flutter_bloc)
+- [GetIt](https://pub.dev/packages/get_it)
+- [WebSocket Channel](https://pub.dev/packages/web_socket_channel)
+- [Dart Frog](https://dartfrog.vgv.dev/)
+
+---
+
+## 📄 License
+
+This project is for educational/demo purposes and not licensed for production use.
