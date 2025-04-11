@@ -1,5 +1,6 @@
+import 'package:intl/intl.dart';
 /// Provides utility methods for formatting date and time into readable formats.
-library;
+
 
 /// Returns a relative time string like '3m', '2h', '1d' based on [time].
 String formatTimeAgo(DateTime time) {
@@ -11,6 +12,6 @@ String formatTimeAgo(DateTime time) {
 }
 
 /// Returns a full formatted date string from [time].
-String formatFullDate(DateTime time) {
-  return '${time.toLocal()}';
+String formatFullDateTime(DateTime time) {
+  return DateFormat('dd/MM/yyyy h:mm a').format(time.toLocal());
 }
