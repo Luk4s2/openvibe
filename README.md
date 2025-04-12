@@ -81,15 +81,7 @@ flutter run
 
 ## 🧪 Testing
 
-Unit testing can be added to:
-- `usecases/`
-- `bloc/`
-
-Add test dependencies in `pubspec.yaml` and use:
-
-```bash
-flutter test
-```
+Unit and widget testing are part of CI
 
 ---
 
