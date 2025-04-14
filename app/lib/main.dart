@@ -20,9 +20,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
-      onGenerateRoute: AppRouter.generateRoute,
       theme: AppTheme.lightTheme,
+      onGenerateRoute: AppRouter.generateRoute,
       initialRoute: AppRoutes.home,
+      onGenerateInitialRoutes: (initialRoute) {
+        return [
+          AppRouter.generateRoute(
+            RouteSettings(name: initialRoute),
+          ),
+        ];
+      },
     );
   }
 }
+

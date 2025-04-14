@@ -3,7 +3,7 @@ import '../../domain/entities/message.dart';
 /// Abstract class defining the contract for any message repository implementation.
 abstract class MessageRepository {
   /// Stream of messages received from the server.
-  Stream<Message> get messages;
+  Stream<List<Message>> get messages;
 
   /// Requests a number of messages from the server using the feed ID.
   void requestMessages(String id, int amount);

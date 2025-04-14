@@ -1,6 +1,6 @@
 /// Application-wide constants
 class AppConstants {
-  static const String websocketIP = "10.0.2.2:8080";
+  static const String websocketIP = '10.0.2.2:8080';
   static const int reconnectInterval = 5;
 
   static const double emojiSize = 24;
@@ -15,7 +15,5 @@ class AppConstants {
   static const String appName = 'Openvibe';
   static const String pageNotFound = 'Page not found';
   static const String errorPrefix = 'Error';
-  static const String messagesTitle = 'Openvibe messages';
-
-  
+  static const String messagesTitle = 'Messages';
 }

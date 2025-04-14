@@ -10,22 +10,16 @@ class MessageModel extends Message {
     required super.createdAt,
   });
 
-  /// Creates a [MessageModel] from a JSON map.
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
-      id: json['id']?.toString() ?? 'unknown',
-      icon: json['icon']?.toString() ?? '',
-      nickname: json['nickname']?.toString() ?? '',
-      message: json['message']?.toString() ?? '',
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-        json['createdAt'] is int
-            ? json['createdAt']
-            : int.tryParse(json['createdAt']?.toString() ?? '') ?? 0,
-      ),
+      id: json['id'] as String? ?? 'unknown',
+      icon: json['icon'] as String? ?? '',
+      nickname: json['nickname'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+      createdAt: _parseTimestamp(json['createdAt']),
     );
   }
 
-  /// Converts this model to a JSON map.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -34,5 +28,11 @@ class MessageModel extends Message {
       'message': message,
       'createdAt': createdAt.millisecondsSinceEpoch,
     };
+  }
+
+  static DateTime _parseTimestamp(dynamic input) {
+    if (input is int) return DateTime.fromMillisecondsSinceEpoch(input);
+    final parsed = int.tryParse(input?.toString() ?? '');
+    return DateTime.fromMillisecondsSinceEpoch(parsed ?? 0);
   }
 }

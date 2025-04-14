@@ -29,10 +29,10 @@ void main() {
   );
 
   blocTest<MessageListBloc, MessageListState>(
-    'emits [Loading, Loaded] when message is streamed',
+    'emits Loading, Loaded when message is streamed',
     build: () {
       when(() => mockRepository.messages).thenAnswer(
-        (_) => Stream.fromIterable([mockMessage]),
+        (_) => Stream.fromIterable([[mockMessage]]),
       );
       when(() => mockRepository.cachedMessages).thenReturn([mockMessage]);
 

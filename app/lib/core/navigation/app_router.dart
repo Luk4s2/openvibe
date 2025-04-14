@@ -12,7 +12,7 @@ class AppRouter {
     switch (settings.name) {
       case AppRoutes.home:
         return MaterialPageRoute(
-          builder: (_) => const MessageListScreen(),
+          builder: (_) => const MessageListWrapper(),
         );
 
       case AppRoutes.detail:

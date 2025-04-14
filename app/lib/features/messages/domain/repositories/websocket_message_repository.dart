@@ -1,24 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:app/core/constants/app_constants.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
+import '../../../../core/storage/message_cache.dart';
 import '../../data/models/message_model.dart';
 import '../../data/services/message_repository.dart';
 import '../../domain/entities/message.dart';
 
-/// Concrete implementation of [MessageRepository] using WebSocket.
+/// WebSocket implementation of [MessageRepository].
 class WebSocketMessageRepository implements MessageRepository {
-  WebSocketChannel? _channel;
-  final List<Message> _cache = [];
-  final _controller = StreamController<Message>.broadcast();
-
-  bool _isConnected = false;
-  bool _isConnecting = false;
-
   static const String _url = 'ws://${AppConstants.websocketIP}/';
   static const Duration _reconnectInterval = Duration(seconds: AppConstants.reconnectInterval);
+
+  final MessageCache _cache = MessageCache();
+  final StreamController<List<Message>> _messageListController = StreamController<List<Message>>.broadcast();
+
+  WebSocketChannel? _channel;
+  bool _isConnected = false;
+  bool _isConnecting = false;
 
   String? _lastFeedId;
   int? _lastAmount;
@@ -28,104 +30,108 @@ class WebSocketMessageRepository implements MessageRepository {
   }
 
   void _initConnection() {
-    if (_isConnecting) return;
+    if (_isConnecting || _isConnected) return;
     _isConnecting = true;
-
-    Timer.periodic(_reconnectInterval, (timer) {
-      if (_isConnected) {
-        timer.cancel();
-        return;
-      }
-
-      try {
-        final channel = WebSocketChannel.connect(Uri.parse(_url));
-
-        channel.stream.listen(
-          _handleData,
-          onDone: () {
-            _isConnected = false;
-            _isConnecting = false;
-            _channel = null;
-          },
-          onError: (_) {
-            _isConnected = false;
-            _isConnecting = false;
-            _channel = null;
-          },
-          cancelOnError: true,
-        );
-
-        _channel = channel;
-        _isConnected = true;
-        _isConnecting = false;
-        timer.cancel();
-
-        if (_lastFeedId != null && _lastAmount != null) {
-          requestMessages(_lastFeedId!, _lastAmount!);
-        }
-      } catch (e) {
-        _isConnected = false;
-        _isConnecting = false;
-        _channel = null;
-      }
-    });
+    _attemptConnection();
   }
 
-  void _handleData(dynamic data) {
-    dynamic decoded;
+  Future<void> _attemptConnection() async {
     try {
-      decoded = jsonDecode(data);
-      if (decoded is String) decoded = jsonDecode(decoded);
-    } catch (_) {
-      _controller.addError(Exception('Failed to decode message: $data'));
-      return;
-    }
+      final channel = WebSocketChannel.connect(Uri.parse(_url));
+      _channel = channel;
 
-    if (decoded is List) {
-      final messages = decoded
-          .whereType<Map<String, dynamic>>()
-          .map(MessageModel.fromJson)
-          .toList();
-      _cache.addAll(messages);
-      _controller.add(messages.last);
-    } else if (decoded is Map<String, dynamic>) {
-      final message = MessageModel.fromJson(decoded);
-      _cache.add(message);
-      _controller.add(message);
-    } else {
-      _controller.addError(Exception('Unexpected message format: $decoded'));
+      channel.stream.listen(
+        _handleIncomingData,
+        onDone: _handleConnectionClosed,
+        onError: (_) => _handleConnectionClosed(),
+        cancelOnError: true,
+      );
+
+      _isConnected = true;
+      _isConnecting = false;
+
+      _replayLastRequest();
+    } catch (_) {
+      _handleConnectionClosed();
+      await Future.delayed(_reconnectInterval);
+      _attemptConnection();
     }
+  }
+
+  void _handleConnectionClosed() => _resetConnectionState();
+
+  void _resetConnectionState() {
+    _isConnected = false;
+    _isConnecting = false;
+    _channel = null;
+  }
+
+  void _replayLastRequest() {
+    if (_lastFeedId != null && _lastAmount != null) {
+      requestMessages(_lastFeedId!, _lastAmount!);
+    }
+  }
+
+  void _handleIncomingData(dynamic rawData) {
+    try {
+      final decoded = _decodeData(rawData);
+
+      if (decoded is List) {
+        _handleMessageList(decoded);
+      } else if (decoded is Map<String, dynamic>) {
+        _handleSingleMessage(decoded);
+      } else {
+        _messageListController.addError(Exception('Unexpected message format'));
+      }
+    } catch (_) {
+      _messageListController.addError(Exception('Failed to decode message: $rawData'));
+    }
+  }
+
+  dynamic _decodeData(dynamic rawData) {
+    final decoded = jsonDecode(rawData);
+    return decoded is String ? jsonDecode(decoded) : decoded;
+  }
+
+  void _handleMessageList(List<dynamic> decodedList) {
+    final messages = decodedList
+        .whereType<Map<String, dynamic>>()
+        .map(MessageModel.fromJson)
+        .toList();
+
+    _cache.addAll(messages);
+    _messageListController.add(_cache.all);
+  }
+
+  void _handleSingleMessage(Map<String, dynamic> data) {
+    final message = MessageModel.fromJson(data);
+    _cache.add(message);
+    _messageListController.add(_cache.all);
   }
 
   @override
-  Stream<Message> get messages => _controller.stream;
+  Stream<List<Message>> get messages => _messageListController.stream;
+
+  @override
+  List<Message> get cachedMessages => _cache.all;
 
   @override
   void requestMessages(String id, int amount) {
     _lastFeedId = id;
     _lastAmount = amount;
 
-    if (_channel != null && _isConnected) {
+    if (_isConnected && _channel != null) {
       final request = ['get', id, amount];
       _channel!.sink.add(jsonEncode(request));
     }
   }
 
   @override
-  Message? getMessageById(String id) {
-    try {
-      return _cache.firstWhere((msg) => msg.id == id);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  @override
-  List<Message> get cachedMessages => List.unmodifiable(_cache);
+  Message? getMessageById(String id) => _cache.getById(id);
 
   @override
   void dispose() {
     _channel?.sink.close(status.goingAway);
-    _controller.close();
+    _messageListController.close();
   }
 }

@@ -8,27 +8,33 @@ import '../bloc/message_list_state.dart';
 class MessageListBloc extends Bloc<MessageListEvent, MessageListState> {
   final FetchMessagesUseCase fetchMessagesUseCase;
 
-  /// Creates a [MessageListBloc] with a required [fetchMessagesUseCase].
   MessageListBloc(this.fetchMessagesUseCase) : super(const MessageListInitial()) {
     on<FetchMessages>(_onFetchMessages);
   }
 
   Future<void> _onFetchMessages(
-  FetchMessages event,
-  Emitter<MessageListState> emit,
-) async {
-  emit(const MessageListLoading());
+    FetchMessages event,
+    Emitter<MessageListState> emit,
+  ) async {
+    emit(const MessageListLoading());
 
-  try {
-    fetchMessagesUseCase(event.feedId, event.amount);
+    try {
+      fetchMessagesUseCase(event.feedId, event.amount);
 
-    // Listen only once and store the subscription
-    await for (final _ in fetchMessagesUseCase.repository.messages) {
-      final messages = fetchMessagesUseCase.repository.cachedMessages;
-      emit(MessageListLoaded(messages));
+      await emit.forEach(
+        fetchMessagesUseCase.repository.messages,
+        onData: (messages) {
+          final sortedMessages = [...messages]
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+          return MessageListLoaded(sortedMessages);
+        },
+        onError: (error, stackTrace) => MessageListError(error.toString()),
+      );
+    } on FormatException catch (e) {
+      emit(MessageListError('Invalid data format: ${e.message}'));
+    } on Exception catch (e) {
+      emit(MessageListError('An error occurred: ${e.toString()}'));
     }
-  } catch (e) {
-    emit(MessageListError(e.toString()));
   }
-}
 }
