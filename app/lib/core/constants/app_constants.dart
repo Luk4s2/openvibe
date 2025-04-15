@@ -1,5 +1,6 @@
 /// Application-wide constants
 class AppConstants {
+  // Change this to you localhost this IP is only for emulators
   static const String websocketIP = '10.0.2.2:8080';
   static const int reconnectInterval = 5;
 

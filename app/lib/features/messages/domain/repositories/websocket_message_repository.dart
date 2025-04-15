@@ -12,11 +12,10 @@ import '../../domain/entities/message.dart';
 
 /// WebSocket implementation of [MessageRepository].
 class WebSocketMessageRepository implements MessageRepository {
-  static const String _url = 'ws://${AppConstants.websocketIP}/';
-  static const Duration _reconnectInterval = Duration(seconds: AppConstants.reconnectInterval);
-
-  final MessageCache _cache = MessageCache();
-  final StreamController<List<Message>> _messageListController = StreamController<List<Message>>.broadcast();
+  final String _url = 'ws://${AppConstants.websocketIP}/';
+  final Duration _reconnectInterval = Duration(seconds: AppConstants.reconnectInterval);
+  final _cache = MessageCache();
+  final _messageListController = StreamController<List<Message>>.broadcast();
 
   WebSocketChannel? _channel;
   bool _isConnected = false;

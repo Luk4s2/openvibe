@@ -5,7 +5,7 @@ import '../../features/messages/domain/repositories/websocket_message_repository
 import '../../features/messages/domain/usecases/fetch_messages_usecase.dart';
 import '../../features/messages/presentation/bloc/message_list_bloc.dart';
 
-final GetIt locator = GetIt.instance;
+final locator = GetIt.instance;
 
 /// Initializes all dependencies used throughout the app.
 void initDependencies() {
